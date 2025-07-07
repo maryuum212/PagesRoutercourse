@@ -4,6 +4,9 @@ import fs from 'fs'; // Node.js module to read files from the file system
 import path from 'path'; // Node.js module to work with file and directory paths
 import matter from 'gray-matter'; // Parses front matter (YAML metadata) from markdown files
 
+import { remark } from 'remark';
+import html from 'remark-html';
+
 // Get the full path to the 'posts' directory
 const postsDirectory = path.join(process.cwd(), 'posts');
 
@@ -58,7 +61,7 @@ export function getAllPostIds() {
 }
 
 // Function to get the data for a single post
-export function getPostData(id) {
+export async function getPostData(id) {
   // Build the full path to the file based on the given ID
   const fullPath = path.join(postsDirectory, `${id}.md`);
 
@@ -67,11 +70,18 @@ export function getPostData(id) {
 
   // Parse the file using gray-matter to extract metadata and content
   const matterResult = matter(fileContents);
+  //use remark to convert markdown into html string
+  const processedContent = await remark()
+  .use(html)
+  .process(matterResult.content)
+  const contentHtml = processedContent.toString();
 
   // Return the post ID, metadata (e.g. title, date), and the raw markdown content
   return {
     id,
+
+       contentHtml,
     ...matterResult.data,
-    content: matterResult.content,
+    //content: matterResult.content,
   };
 }

@@ -1,7 +1,9 @@
 // pages/posts/[id].js
-
+import Date from '../../components/date';
 import Layout from '../../components/layout'; // Import the layout wrapper component
 import { getAllPostIds, getPostData } from '../../lib/posts'; // Import functions to get post data
+import Head from 'next/head';
+import utilStyles from '../../styles/utils.module.css';
 
 // Next.js function to generate all possible paths for this dynamic route
 export async function getStaticPaths() {
@@ -15,7 +17,7 @@ export async function getStaticPaths() {
 
 // This function runs at build time for each post page to get its data
 export async function getStaticProps({ params }) {
-  const postData = getPostData(params.id); // Get post data for the given ID
+  const postData = await getPostData(params.id); // Get post data for the given ID
 
   return {
     props: {
@@ -28,20 +30,27 @@ export async function getStaticProps({ params }) {
 export default function Post({ postData }) {
   return (
     <Layout>
+      <Head>
+          <title>{postData.title}</title>
+        </Head>
+
       <article>
+        
         {/* Post title from front matter */}
-        <h1>{postData.title}</h1>
+        <h1 className={utilStyles.headingXl}>{postData.title}</h1>
+    
 
         {/* Post date from front matter */}
-        <div>{postData.date}</div>
+        {/* <div>{postData.date}</div> */}
+        <div className={utilStyles.lightText}> <Date dateString={postData.date} /></div>
 
-        {/* Post ID (derived from filename) */}
-        <div>{postData.id}</div>
-
+   
         {/* Raw markdown content (currently not rendered as HTML) */}
-        <div>
+        {/* <div>
           <pre>{postData.content}</pre>
-        </div>
+        </div> */}
+        <div dangerouslySetInnerHTML={{__html: postData.contentHtml
+        }} />
       </article>
     </Layout>
   );
